@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
+# set -x # For debugging
 
 usage(){
 cat << EOU 
 Usage: bak2frasdrive.sh -d directory [-f <gdrive> -p <path in gdrive> ... ]
 
 REQUIRED:
-	-d	Directory to be [compressed], tared, and uploaded to the drive
+	-d	Directory to be [compressed], tared, and uploaded to the drive.
+		NOTE: tar always ignores and excludes .snakemake directories.
 
 OPTIONAL:
 	-g	Name of the remote from rclone. Tested only on gdrives but
@@ -15,7 +17,8 @@ OPTIONAL:
 		*B*EFORE taring. NOTE: This will actually modify the files
 		in the local directory by compressing them. It is more
 		efficient but it could break things that rely on specific
-		filenames. [false]
+		filenames. Compression will ignore BAM (.bam) files and files
+		already compressed (.gz, .zip, .bz2). [false]
 
 For any suggestions raise an issue at https://github.com/surh/utils/issues
 EOU
@@ -78,11 +81,27 @@ fi
 # First compress all files.
 compressed=0
 if [[ "$pre_compress" == "true" ]]; then
-	file_exceptions='! -name "*.gz" ! -name "*.bam" ! -name "*.bz2" ! -name "*.zip"'
-	dir_exceptions='! -path "*/.snakemake/*"'
-	echo "Compressiing files inside $indir"
-	echo ">find $indir -type f $file_exceptions $dir_exceptions -exec gzip {} \;"
-	find $indir -type f "$file_exceptions $dir_exceptions" -exec gzip {} \;
+	cmd_pars=("-type" "f")
+
+	# Add file extension exceptions
+	file_exceptions=('.gz' '.bz2' '.zip' '.bam')
+	for exception in ${file_exceptions[@]}; do
+		cmd_pars[${#cmd_pars[@]}]="-not"
+		cmd_pars[${#cmd_pars[@]}]="-name"
+		cmd_pars[${#cmd_pars[@]}]="*$exception"
+	done
+
+
+	# Add dir exceptions
+	dir_exceptions=('.snakemake')
+	for exception in ${dir_exceptions[@]}; do
+		cmd_pars[${#cmd_pars[@]}]="-not"
+		cmd_pars[${#cmd_pars[@]}]="-path"
+		cmd_pars[${#cmd_pars[@]}]="*/$exception/*"
+	done
+
+	echo ">find $indir -type f ${cmd_pars[@]} -exec gzip {} \;"
+	find $indir -type f "${cmd_pars[@]}" -exec gzip {} \;
 	compressed=1
 fi
 
@@ -103,7 +122,6 @@ else
 	echo "Unexpected compressed flag ($compressed)"
 	exit 2
 fi
-
 
 # Rclone to gdrive
 echo "Uploading to gdrive with rclone"
