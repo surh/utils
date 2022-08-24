@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+usage(){
+cat << EOU 
+Usage: bak2frasdrive.sh -d directory [-f <gdrive> -p <path in gdrive> ... ]
+
+REQUIRED:
+	-d	Directory to be [compressed], tared, and uploaded to the drive
+
+OPTIONAL:
+	-g	Name of the remote from rclone. Tested only on gdrives but
+		in principle should work with any remote. [fraserlab_gdrive]
+	-p	Path in the remote to store tar file. [backup/$(whoami)]
+	-b	Flag to indicate if compression should be done (with gzip)
+		*B*EFORE taring. NOTE: This will actually modify the files
+		in the local directory by compressing them. It is more
+		efficient but it could break local links. [false]
+
+For any suggestions raise an issue at https://github.com/surh/utils/issues
+EOU
+}
+
 # Read options
 pre_compress=false
 while getopts d:g:p:b flag
@@ -9,6 +29,9 @@ do
 		g) gdrive=${OPTARG};;
 		p) gdrive_path=${OPTARG};;
 		b) pre_compress=true;;
+
+		*) usage
+		   exit 0;;
 	esac
 done
 # indir=$1
@@ -18,7 +41,8 @@ done
 # Set parameters defaults
 if [[ $indir == "" ]]; then
 	echo "No input directory specified"
-	exit 1
+	usage
+	exit 0
 fi
 
 if [[ $gdrive == "" ]]; then
@@ -76,7 +100,7 @@ dir_exceptions="--exclude=.snakemake"
 if [ $compressed == 1 ]; then
 	echo "Taring $indir"
 	echo ">tar $dir_exceptions -cvvf $tar_file $indir"
-	tar "$dir_exceptions" -cvvf $tar_file $indir
+	tar $dir_exceptions -cvvf $tar_file $indir
 elif [ $compressed == 0 ]; then
 	tar_file="$tar_file.gz"
 	echo "Taring and compressing $indir"
