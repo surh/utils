@@ -15,7 +15,7 @@ OPTIONAL:
 	-p	Path in the remote to store tar file. [backup/$(whoami)]
 	-b	Flag to indicate if compression should be done (with gzip)
 		*B*EFORE taring. NOTE: This will actually modify the files
-		in the local directory by compressing them. It is more
+		in the local directory by compressing them. It can be more
 		efficient but it could break things that rely on specific
 		filenames. Compression will ignore BAM (.bam) files and files
 		already compressed (.gz, .zip, .bz2). [false]
