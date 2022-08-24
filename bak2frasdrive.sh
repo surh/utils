@@ -14,7 +14,8 @@ OPTIONAL:
 	-b	Flag to indicate if compression should be done (with gzip)
 		*B*EFORE taring. NOTE: This will actually modify the files
 		in the local directory by compressing them. It is more
-		efficient but it could break local links. [false]
+		efficient but it could break things that rely on specific
+		filenames. [false]
 
 For any suggestions raise an issue at https://github.com/surh/utils/issues
 EOU
