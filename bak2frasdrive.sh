@@ -34,11 +34,8 @@ do
 		   exit 0;;
 	esac
 done
-# indir=$1
-# gdrive="fraserlab_gdrive"
-# gdrive_path=""
 
-# Set parameters defaults
+# Check options and set defaults
 if [[ $indir == "" ]]; then
 	echo "No input directory specified"
 	usage
@@ -55,11 +52,6 @@ if [[ $gdrive_path == "" ]]; then
 	gdrive_path="backup/$id"
 	echo "gdrive path not provided, using $gdrive_path"
 fi
-
-# echo "indir is $indir"
-# echo "gdrive is $gdrive"
-# echo "gdrive_path is $gdrive_path"
-# echo "pre_compress is $pre_compress"
 
 # Check rclone
 if [ ! $(type -P rclone) ]; then
