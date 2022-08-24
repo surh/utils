@@ -2,7 +2,7 @@
 
 # Copyright
 
-    (C) Copyright 2018 Sur Herrera Paredes
+    (C) Copyright 2018-2022 Sur Herrera Paredes
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
