@@ -39,7 +39,7 @@ do
 		g) gdrive=${OPTARG};;
 		p) gdrive_path=${OPTARG};;
 		b) pre_compress=true;;
-		o) overwrite=false
+		o) overwrite=false;;
 
 		*) usage
 		   exit 0;;
