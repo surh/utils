@@ -2,8 +2,8 @@
 # set -x # For debugging
 
 usage(){
-cat << EOU 
-Usage: bak2frasdrive.sh -d directory [-f <gdrive> -p <path in gdrive> ... ]
+cat << EOU
+Usage: bak2frasdrive.sh -d directory [-g <gdrive> -p <path in gdrive> ... ]
 
 REQUIRED:
 	-d	Directory to be [compressed], tared, and uploaded to the drive.
@@ -12,13 +12,18 @@ REQUIRED:
 OPTIONAL:
 	-g	Name of the remote from rclone. Tested only on gdrives but
 		in principle should work with any remote. [fraserlab_gdrive]
-	-p	Path in the remote to store tar file. [backup/$(whoami)]
+	-p	Path in the remote to store tar file. If the path does not
+			exist it will be created. [backup/$(whoami)]
 	-b	Flag to indicate if compression should be done (with gzip)
 		*B*EFORE taring. NOTE: This will actually modify the files
 		in the local directory by compressing them. It can be more
 		efficient but it could break things that rely on specific
 		filenames. Compression will ignore BAM (.bam) files and files
 		already compressed (.gz, .zip, .bz2). [false]
+	-o	By default, rclone is set to not replace files with a newer
+		timestamp in the remote (option --update). Using this flag
+		will remove that option and *O*VERWRITE any file with the
+		same name in the remote. [false]
 
 For any suggestions raise an issue at https://github.com/surh/utils/issues
 EOU
@@ -26,13 +31,15 @@ EOU
 
 # Read options
 pre_compress=false
-while getopts d:g:p:b flag
+overwrite=false
+while getopts d:g:p:b:o flag
 do
 	case "${flag}" in
 		d) indir=${OPTARG};;
 		g) gdrive=${OPTARG};;
 		p) gdrive_path=${OPTARG};;
 		b) pre_compress=true;;
+		o) overwrite=true;;
 
 		*) usage
 		   exit 0;;
@@ -106,8 +113,10 @@ if [[ "$pre_compress" == "true" ]]; then
 fi
 
 # Create tar file
+## Build name for tar file
 name=`basename $indir`
 tar_file="$name.tar"
+## Exclude .snakemake
 dir_exceptions="--exclude=.snakemake"
 if [ $compressed == 1 ]; then
 	echo "Taring $indir"
@@ -118,13 +127,19 @@ elif [ $compressed == 0 ]; then
 	echo "Taring and compressing $indir"
 	echo ">tar $dir_exceptions -cvvzf $tar_file $indir"
 	tar $dir_exceptions -cvvzf $tar_file $indir
+	compressed=1
 else
 	echo "Unexpected compressed flag ($compressed)"
 	exit 2
 fi
 
 # Rclone to gdrive
+## Set update option
+if [[ "$overwrite" == "true" ]]; then
+	update_opt=""
+else
+	update_opt="--update"
+fi
 echo "Uploading to gdrive with rclone"
-echo ">rclone sync --tpslimit 2 --transfers 1 $tar_file $gdrive:$gdrive_path --verbose"
-rclone sync --tpslimit 2 --transfers 1 $tar_file $gdrive:$gdrive_path --verbose
-
+echo ">rclone sync --tpslimit 2 --transfers 1 $tar_file $gdrive:$gdrive_path --verbose $update_opt"
+rclone sync --tpslimit 2 --transfers 1 $tar_file $gdrive:$gdrive_path --verbose $update_opt
