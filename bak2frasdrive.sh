@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x # For debugging
+# set -x # For debugging
 
 usage(){
 cat << EOU
@@ -136,11 +136,9 @@ fi
 # Rclone to gdrive
 ## Set update option
 if [[ "$overwrite" == "true" ]]; then
-	update_opt="--update"
-	echo "Hola"
-else
 	update_opt=""
-	echo "Adios"
+else
+	update_opt="--update"
 fi
 echo "Uploading to gdrive with rclone"
 echo ">rclone sync --tpslimit 2 --transfers 1 $tar_file $gdrive:$gdrive_path --verbose $update_opt"
