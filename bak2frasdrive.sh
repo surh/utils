@@ -20,10 +20,10 @@ OPTIONAL:
 		efficient but it could break things that rely on specific
 		filenames. Compression will ignore BAM (.bam) files and files
 		already compressed (.gz, .zip, .bz2). [false]
-	-o By default, rclone is set to not replace files with a newer
-	timestamp in the remote (option --update). Using this flag
-	will remove that option and *O*VERWRITE any file with the
-	same name in the remote. [false]
+	-o	By default, rclone is set to not replace files with a newer
+		timestamp in the remote (option --update). Using this flag
+		will remove that option and *O*VERWRITE any file with the
+		same name in the remote. [false]
 
 For any suggestions raise an issue at https://github.com/surh/utils/issues
 EOU
