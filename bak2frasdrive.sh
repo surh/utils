@@ -13,7 +13,7 @@ OPTIONAL:
 	-g	Name of the remote from rclone. Tested only on gdrives but
 		in principle should work with any remote. [fraserlab_gdrive]
 	-p	Path in the remote to store tar file. If the path does not
-			exist it will be created. [backup/$(whoami)]
+		exist it will be created. [backup/$(whoami)]
 	-b	Flag to indicate if compression should be done (with gzip)
 		*B*EFORE taring. NOTE: This will actually modify the files
 		in the local directory by compressing them. It can be more
@@ -32,7 +32,7 @@ EOU
 # Read options
 pre_compress=false
 overwrite=false
-while getopts d:g:p:b:o flag
+while getopts d:g:p:bo flag
 do
 	case "${flag}" in
 		d) indir=${OPTARG};;
